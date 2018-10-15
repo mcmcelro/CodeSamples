@@ -90,7 +90,7 @@ namespace SudokuSolver
             // and the column does not contain the number...
             && !columnContainsNumber(passedBoard, column, number)
             // and the 3x3 section that the square falls in does not contain the number...
-            && !sectionContainsNumber(passedBoard, row, column, number);
+            && !sectionContainsNumber(passedBoard, row - row % 3, column - column % 3, number);
             // you can put the number in this space!
         }
 
