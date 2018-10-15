@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace SudokuSolver
 {
@@ -13,181 +10,127 @@ namespace SudokuSolver
         {
             if (args.Length < 1)
             {
-                Console.WriteLine($"Syntax: {Path.GetFileName(System.Reflection.Assembly.GetEntryAssembly().Location)} <input file>");
+                Console.WriteLine($"Syntax: {Path.GetFileName(Assembly.GetEntryAssembly().Location)} <input file>");
                 return;
             }
 
-            SudokuBoard boardToSolve = new SudokuBoard(args[0]);
+            try
+            {
+                SudokuBoard boardToSolve = new SudokuBoard(args[0]);
+                boardToSolve.solveBoard();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                Console.ReadLine();
+            }
         }
     }
 
-    // abstract class defining functions needed for board sections,
-    // which could be either the 3x3 sections or the whole board
-    abstract class SudokuSection
+    class SudokuBoard
     {
-        // initial values assigned to section
-        protected string initialValues;
+        int[,] values;
+        string outputFileName;
 
-        // is this a valid solution?
-        public abstract bool isValid();
-
-        // is this valid so far as it has been completed?
-        public abstract bool isPartiallyValid();
-
-        // does the section have child sections?
-        protected abstract bool hasChildren();
-
-        // reset to initial values
-        protected abstract void resetToStart();
-    }
-
-    // class for a 3x3 board section
-    class SudokuSubsection : SudokuSection
-    {
-        int[] values;
-
-        // default constructor with no input
-        public SudokuSubsection()
+        public SudokuBoard(string boardFile)
         {
-            initialValues = "XXXXXXXXX";
-            values = new int[9];
+            values = new int[9, 9];
+            outputFileName = Path.GetFileNameWithoutExtension(boardFile) + ".sol.txt";
+            string initialValues = new StreamReader(File.OpenRead(boardFile)).ReadToEnd().Replace("\n", "").Replace("\r", "");
+
+            for (var row = 0; row < 9; row++)
+            {
+                for (var column = 0; column < 9; column++)
+                {
+                    char thisVal = initialValues[9 * row + column];
+                    if ((thisVal < '0' || thisVal > '9') && thisVal != 'X')
+                        throw new InvalidDataException($"Invalid character found on board: {thisVal}");
+                    values[row, column] = thisVal == 'X' ? 0 : thisVal - '0';
+                }
+            }
+            if (initialValues.Length != 81) throw new InvalidDataException($"Invalid board size: {initialValues.Length} (should be 81)");
         }
 
-        // constructor with a 9-character input string indicating starting values
-        public SudokuSubsection(string sectionValues)
+        // see if a row contains a number
+        private bool rowContainsNumber(int[,] passedBoard, int row, int number)
         {
-            initialValues = sectionValues;
-            resetToStart();
-        }
+            for (int column = 0; column < 9; column++)
+                if (passedBoard[row, column] == number) return true;
 
-        // is this a valid solution? i.e., no repeats and fully completed
-        public override bool isValid()
-        {
-            return values.Where(val => val != 0).Distinct().Count() == 9;
-        }
-
-        // is this valid so far as it has been completed? i.e., no repeats among non-zeroes
-        public override bool isPartiallyValid()
-        {
-            return values.Where(val => val != 0).Distinct().Count() == values.Where(val => val != 0).Count();
-        }
-
-        // does the section have child sections? should always be false
-        protected override bool hasChildren()
-        {
             return false;
         }
 
-        // reset to initial values
-        protected override void resetToStart()
+        // see if a column contains a number
+        private bool columnContainsNumber(int[,] passedBoard, int column, int number)
         {
-            values = new int[9];
-            if(initialValues.Length != 9)
+            for (int row = 0; row < 9; row++)
+                if (passedBoard[row, column] == number) return true;
+
+            return false;
+        }
+
+        // see if <number> is used in a 3x3 section starting at [sectionStartingRow, sectionStartingColumn]
+        private bool sectionContainsNumber(int[,] passedBoard, int sectionStartingRow, int sectionStartingColumn, int number)
+        {
+            for (int row = sectionStartingRow; row < sectionStartingRow + 3; row++)
             {
-                throw new InvalidDataException($"Invalid tile size {initialValues.Length} detected.");
-            }
-            try
-            {
-                for (int i = 0; i < 9; i++)
+                for (int column = sectionStartingColumn; column < sectionStartingColumn + 3; column++)
                 {
-                    if (initialValues[i] == 'X')
-                    {
-                        values[i] = 0;
-                    }
-                    else if (initialValues[i] > '9' || initialValues[i] < '1')
-                    {
-                        throw new InvalidDataException($"Invalid input character {initialValues[i]} found in board.");
-                    }
-                    else
-                    {
-                        values[i] = initialValues[i] - '0';
-                    }
+                    if (passedBoard[row, column] == number) return true;
                 }
             }
-            catch (IndexOutOfRangeException ex)
-            {
-                throw new InvalidDataException("Invalid number of values found in a tile.");
-            }
-        }
-    }
-
-    class SudokuBoard : SudokuSection
-    {
-        List<SudokuSection> tiles;
-
-        // default constructor with no input
-        public SudokuBoard()
-        {
-            tiles = new List<SudokuSection>();
-            for (int i = 0; i < 9; i++)
-            {
-                tiles.Add(new SudokuSubsection());
-            }
+            return false;
         }
 
-        // constructor with a filename from which to load values
-        public SudokuBoard(string boardFile)
+        // see if [row, column] can legally hold <number>
+        private bool canSpaceHoldNumber(int[,] passedBoard, int row, int column, int number)
         {
-            try
-            {
-                initialValues = new StreamReader(File.OpenRead(boardFile)).ReadToEnd();
-                resetToStart();
-            }
-            catch (IOException ex)
-            {
-                Console.Error.WriteLine($"Could not open board file for input. Details: {ex.Message}");
-            }
-            catch (InvalidDataException ex)
-            {
-                Console.Error.WriteLine(ex.Message);
-            }
+            // if the row does not contain the number...
+            return !rowContainsNumber(passedBoard, row, number)
+            // and the column does not contain the number...
+            && !columnContainsNumber(passedBoard, column, number)
+            // and the 3x3 section that the square falls in does not contain the number...
+            && !sectionContainsNumber(passedBoard, row, column, number);
+            // you can put the number in this space!
         }
 
-        // is this a valid solution? i.e., all subsections valid
-        public override bool isValid()
+        // find the first empty space; returns (row: -1, column: -1) if none are found
+        private (int row, int column) getEmptySpace(int[,] passedBoard)
         {
-            bool isGood = true;
-            foreach (var tile in tiles)
-            {
-                isGood = isGood && tile.isValid();
-            }
-            return isGood;
+            for (int row = 0; row < 9; row++)
+                for (int column = 0; column < 9; column++)
+                    if (passedBoard[row, column] == 0) return (row: row, column: column);
+
+            return (-1, -1);
         }
 
-
-        // is this valid so far as it has been completed? i.e., all subsections partially valid
-        public override bool isPartiallyValid()
+        public void solveBoard()
         {
-            bool isGood = true;
-            foreach (var tile in tiles)
+            using (StreamWriter outputFile = new StreamWriter(File.OpenWrite(outputFileName)))
             {
-                isGood = isGood && tile.isPartiallyValid();
-            }
-            return isGood;
-        }
-
-        // does the section have child sections? should always be true
-        protected override bool hasChildren()
-        {
-            return true;
-        }
-
-        // reset to initial values
-        protected override void resetToStart()
-        {
-            tiles = new List<SudokuSection>();
-            using (StringReader valueLines = new StringReader(initialValues))
-            {
-                string line;
-                while ((line = valueLines.ReadLine()) != null)
+                outputFile.BaseStream.SetLength(0);
+                if (solve(values))
                 {
-                    tiles.Add(new SudokuSubsection(line));
+                    for (int row = 0; row < 9; row++)
+                    {
+                        for (int column = 0; column < 9; column++)
+                        {
+                            outputFile.Write(values[row, column] + "");
+                        }
+                        outputFile.Write("\r\n");
+                    }
+                }
+                else
+                {
+                    outputFile.WriteLine("Board is not solvable.");
                 }
             }
-            if (tiles.Count() > 9 || tiles.Count() < 1)
-            {
-                throw new InvalidDataException("Invalid board input detected.");
-            }
+        }
+
+        private bool solve(int[,] passedBoard)
+        {
+            //TBD... all I can think of right now is randomly guessing and checking but there must be a better way
+            return false;
         }
     }
 }
