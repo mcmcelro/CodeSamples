@@ -26,16 +26,19 @@ namespace SudokuSolver
     abstract class SudokuSection
     {
         // initial values assigned to section
-        internal string initialValues;
+        protected string initialValues;
 
         // is this a valid solution?
-        internal abstract bool isValid();
+        public abstract bool isValid();
+
+        // is this valid so far as it has been completed?
+        public abstract bool isPartiallyValid();
 
         // does the section have child sections?
-        internal abstract bool hasChildren();
+        protected abstract bool hasChildren();
 
         // reset to initial values
-        internal abstract void resetToStart();
+        protected abstract void resetToStart();
     }
 
     // class for a 3x3 board section
@@ -50,28 +53,33 @@ namespace SudokuSolver
             values = new int[9];
         }
 
-        // constructor with a 9-character string of values
+        // constructor with a 9-character input string indicating starting values
         public SudokuSubsection(string sectionValues)
         {
             initialValues = sectionValues;
             resetToStart();
         }
-        // constructor with a 9-character input string indicating starting values
 
-        // is this a valid solution? i.e., no repeats
-        internal override bool isValid()
+        // is this a valid solution? i.e., no repeats and fully completed
+        public override bool isValid()
         {
             return values.Where(val => val != 0).Distinct().Count() == 9;
         }
 
+        // is this valid so far as it has been completed? i.e., no repeats among non-zeroes
+        public override bool isPartiallyValid()
+        {
+            return values.Where(val => val != 0).Distinct().Count() == values.Where(val => val != 0).Count();
+        }
+
         // does the section have child sections? should always be false
-        internal override bool hasChildren()
+        protected override bool hasChildren()
         {
             return false;
         }
 
         // reset to initial values
-        internal override void resetToStart()
+        protected override void resetToStart()
         {
             values = new int[9];
             if(initialValues.Length != 9)
@@ -107,6 +115,7 @@ namespace SudokuSolver
     {
         List<SudokuSection> tiles;
 
+        // default constructor with no input
         public SudokuBoard()
         {
             tiles = new List<SudokuSection>();
@@ -116,6 +125,7 @@ namespace SudokuSolver
             }
         }
 
+        // constructor with a filename from which to load values
         public SudokuBoard(string boardFile)
         {
             try
@@ -133,9 +143,10 @@ namespace SudokuSolver
             }
         }
 
-        internal override bool isValid()
+        // is this a valid solution? i.e., all subsections valid
+        public override bool isValid()
         {
-            bool isGood = false;
+            bool isGood = true;
             foreach (var tile in tiles)
             {
                 isGood = isGood && tile.isValid();
@@ -143,12 +154,26 @@ namespace SudokuSolver
             return isGood;
         }
 
-        internal override bool hasChildren()
+
+        // is this valid so far as it has been completed? i.e., all subsections partially valid
+        public override bool isPartiallyValid()
+        {
+            bool isGood = true;
+            foreach (var tile in tiles)
+            {
+                isGood = isGood && tile.isPartiallyValid();
+            }
+            return isGood;
+        }
+
+        // does the section have child sections? should always be true
+        protected override bool hasChildren()
         {
             return true;
         }
 
-        internal override void resetToStart()
+        // reset to initial values
+        protected override void resetToStart()
         {
             tiles = new List<SudokuSection>();
             using (StringReader valueLines = new StringReader(initialValues))
