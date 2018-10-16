@@ -1,0 +1,11 @@
+		    var firstEmptySpace = getEmptySpace(passedBoard);
+            if (firstEmptySpace.row == -1 && firstEmptySpace.column == -1) return true;
+            for (int valToTest = 1; valToTest <= 9; valToTest++)
+            {
+                if (canSpaceHoldNumber(passedBoard, firstEmptySpace.row, firstEmptySpace.column, valToTest))
+                {
+                    passedBoard[firstEmptySpace.row, firstEmptySpace.column] = valToTest;
+                    if (solve(passedBoard)) return true;
+                    passedBoard[firstEmptySpace.row, firstEmptySpace.column] = 0;
+                }
+            }

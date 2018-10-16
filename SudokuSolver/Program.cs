@@ -129,7 +129,15 @@ namespace SudokuSolver
 
         private bool solve(int[,] passedBoard)
         {
-            //TBD... all I can think of right now is randomly guessing and checking but there must be a better way
+            // methodology:
+            // 1. find the first empty square on the board
+            // 2. loop through numbers 1-9 to see which one can be placed there
+            // 3. if a number can be placed, place it and pass the new board to a
+            //    recursive call to the solver function
+            // 4. if a number can't be placed, wipe the number back out and return to the last
+            //    recursive call to the solver function, proceeding to the next potential solution
+            // 5. if we get all the way through 9 on the first empty space and can't place a number,
+            //    it's an invalid board and there is no solution
             return false;
         }
     }
