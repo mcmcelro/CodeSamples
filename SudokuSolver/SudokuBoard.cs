@@ -11,7 +11,7 @@ namespace SudokuSolver
 
         public bool isSolved()
         {
-            return solved;
+            return this.solved;
         }
 
         public static SudokuBoard LoadSudokuBoardFromFile(string boardFileName)
@@ -36,19 +36,19 @@ namespace SudokuSolver
 
         public SudokuBoard(int[][] boardData)
         {
-            values = (int[][])boardData.Clone();
+            this.values = (int[][])boardData.Clone();
         }
 
         // see if a row contains a number
         private bool rowContainsNumber(int row, int number)
         {
-            return values[row].Contains(number);
+            return this.values[row].Contains(number);
         }
 
         // see if a column contains a number
         private bool columnContainsNumber(int column, int number)
         {
-            return values.Select(row => row[column]).Contains(number);
+            return this.values.Select(row => row[column]).Contains(number);
         }
 
         // see if <number> is used in a 3x3 section starting at [sectionStartingRow][sectionStartingColumn]
@@ -58,7 +58,7 @@ namespace SudokuSolver
             {
                 for (int column = sectionStartingColumn; column < sectionStartingColumn + 3; column++)
                 {
-                    if (values[row][column] == number) return true;
+                    if (this.values[row][column] == number) return true;
                 }
             }
             return false;
@@ -81,14 +81,14 @@ namespace SudokuSolver
         {
             for (int row = 0; row < 9; row++)
                 for (int column = 0; column < 9; column++)
-                    if (values[row][column] == 0) return (row: row, column: column);
+                    if (this.values[row][column] == 0) return (row: row, column: column);
 
             return (-1, -1);
         }
 
         public void solveBoard()
         {
-            solved = solveRecursively();
+            this.solved = solveRecursively();
         }
 
         private bool solveRecursively()
@@ -108,9 +108,9 @@ namespace SudokuSolver
             {
                 if (canSpaceHoldNumber(firstEmptySpace.row, firstEmptySpace.column, valToTest))
                 {
-                    values[firstEmptySpace.row][firstEmptySpace.column] = valToTest;
+                    this.values[firstEmptySpace.row][firstEmptySpace.column] = valToTest;
                     if (solveRecursively()) return true;
-                    values[firstEmptySpace.row][firstEmptySpace.column] = 0;
+                    this.values[firstEmptySpace.row][firstEmptySpace.column] = 0;
                 }
             }
             return false;
@@ -120,13 +120,13 @@ namespace SudokuSolver
             using (StreamWriter outputFile = new StreamWriter(File.OpenWrite(outputFileName)))
             {
                 outputFile.BaseStream.SetLength(0);
-                if (solved)
+                if (this.solved)
                 {
                     for (int row = 0; row < 9; row++)
                     {
                         for (int column = 0; column < 9; column++)
                         {
-                            outputFile.Write(values[row][column] + "");
+                            outputFile.Write(this.values[row][column] + "");
                         }
                         outputFile.Write("\r\n");
                     }
