@@ -36,7 +36,7 @@ namespace SudokuSolver
         public SudokuBoard(string boardFile)
         {
             values = new int[9][];
-            outputFileName = Path.GetFileNameWithoutExtension(boardFile) + ".sol.txt";
+            outputFileName = Path.GetFileNameWithoutExtension(boardFile) + ".sln.txt";
             string initialValues = new StreamReader(File.OpenRead(boardFile)).ReadToEnd().Replace("\n", "").Replace("\r", "");
             if (initialValues.Length != 81) throw new InvalidDataException($"Invalid board size: {initialValues.Length} (should be 81)");
 
