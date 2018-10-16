@@ -16,7 +16,7 @@ public class SudokuBoard {
     {
         int[][] boardData = new int[9][];
         String initialValues = String.join("", Files.readAllLines(Paths.get(boardfileName))).replaceAll("[\r\n]", "");
-        if(initialValues.length() < 81) {
+        if(initialValues.length() != 81) {
             throw new Exception(String.format("Invalid board size: %s (should be 81)", initialValues.length()));
         }
 
