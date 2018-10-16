@@ -4,7 +4,7 @@ Sample code for various purposes.
 
 ## SudokuSolver
 
-A universal Sudoku puzzle solver, written in C# (using features in C# 7.0). If a puzzle is solvable, the solution will be saved in <filename>.sol.txt; if not, <filename>.sol.txt will contain a message stating as much.
+A universal Sudoku puzzle solver, written in C# (using features in C# 7.0). If a puzzle is solvable, the solution will be saved in <filename>.sol.txt; if not, <filename>.sln.txt will contain a message stating as much.
 
 ## SudokuSolverJava
 
