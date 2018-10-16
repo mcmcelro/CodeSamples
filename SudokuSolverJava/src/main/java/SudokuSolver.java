@@ -29,7 +29,7 @@ class SudokuBoard {
             throws FileNotFoundException, IOException, Exception
     {
         values = new int[9][];
-        outputFileName = boardFileName.substring(0, boardFileName.lastIndexOf(".")) + ".sol.txt";
+        outputFileName = boardFileName.substring(0, boardFileName.lastIndexOf(".")) + ".sln.txt";
         String initialValues = String.join("", Files.readAllLines(Paths.get(boardFileName))).replaceAll("[\r\n]", "");
         if(initialValues.length() < 81) {
             throw new Exception(String.format("Invalid board size: %s (should be 81)", initialValues.length()));
