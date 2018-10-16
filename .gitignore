@@ -328,3 +328,22 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+SudokuSolverJava/puzzle1.sol.txt
+SudokuSolverJava/puzzle1.txt
+SudokuSolverJava/puzzle2.sol.txt
+SudokuSolverJava/puzzle2.txt
+SudokuSolverJava/puzzle3.sol.txt
+SudokuSolverJava/puzzle3.txt
+SudokuSolverJava/puzzle4.sol.txt
+SudokuSolverJava/puzzle4.txt
+SudokuSolverJava/puzzle5.sol.txt
+SudokuSolverJava/puzzle5.txt
+SudokuSolverJava/target/classes/puzzle1.txt
+SudokuSolverJava/target/classes/puzzle2.txt
+SudokuSolverJava/target/classes/puzzle3.txt
+SudokuSolverJava/target/classes/puzzle4.txt
+SudokuSolverJava/target/classes/puzzle5.txt
+SudokuSolverJava/target/classes/SudokuBoard.class
+SudokuSolverJava/target/classes/SudokuSolver.class
+SudokuSolverJava/SudokuBoard.class
+SudokuSolverJava/SudokuSolver.class
