@@ -53,7 +53,7 @@ public class SudokuBoard {
     }
 
     // see if a column contains a number
-    private boolean columnContainsNumber(int column, Integer number)
+    private boolean columnContainsNumber(int column, int number)
     {
         for(int row = 0; row < 9; row++)
         {
@@ -63,11 +63,11 @@ public class SudokuBoard {
     }
 
     // see if <number> is used in a 3x3 section starting at [sectionStartingRow][sectionStartingColumn]
-    private boolean sectionContainsNumber(int sectionStartingRow, int sectionStartingColumn, Integer number)
+    private boolean sectionContainsNumber(int sectionStartingRow, int sectionStartingColumn, int number)
     {
         for(int row = sectionStartingRow; row < sectionStartingRow + 3; row++)
         {
-            for (int column = sectionStartingColumn; column < sectionStartingColumn + 2; column++) {
+            for (int column = sectionStartingColumn; column < sectionStartingColumn + 3; column++) {
                 if(this.values[row][column] == number) return true;
             }
         }
@@ -75,7 +75,7 @@ public class SudokuBoard {
     }
 
     // see if [row][column] can legally hold <number>
-    private boolean canSpaceHoldNumber(int row, int column, Integer number)
+    private boolean canSpaceHoldNumber(int row, int column, int number)
     {
         // if the row does not contain the number...
         return !rowContainsNumber(row, number)
