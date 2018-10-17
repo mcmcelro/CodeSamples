@@ -4,14 +4,20 @@ using System.Linq;
 
 namespace SudokuSolver
 {
-    class SudokuBoard
+    public class SudokuBoard
     {
         private int[][] values;
         private bool solved;
+        private bool loaded;
 
         public bool isSolved()
         {
             return this.solved;
+        }
+
+        public bool isLoaded()
+        {
+            return this.loaded;
         }
 
         public static SudokuBoard LoadSudokuBoardFromFile(string boardFileName)
@@ -36,7 +42,16 @@ namespace SudokuSolver
 
         public SudokuBoard(int[][] boardData)
         {
-            this.values = (int[][])boardData.Clone();
+            // make sure it's 9x9 in case it wasn't loaded from a file
+            if (boardData.Length == 9)
+            {
+                for (int row = 0; row < 9; row++)
+                {
+                    if (boardData[row].Length != 9) return;
+                }
+                this.values = (int[][])boardData.Clone();
+                this.loaded = true;
+            }
         }
 
         // see if a row contains a number
