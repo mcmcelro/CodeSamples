@@ -25,7 +25,7 @@ class SudokuBoardTest extends groovy.util.GroovyTestCase {
         }
     }
 
-    // tests for when the board is directly input via code and solvable
+    // tests for when the board is directly input via code
     @Test
     void testSolveDirectInputBoard() {
         try {
@@ -50,7 +50,6 @@ class SudokuBoardTest extends groovy.util.GroovyTestCase {
             boardData = [[]]
             testDirectBoard = new SudokuBoard(boardData)
             Assert.assertFalse("testSolveDirectInputBoard: testDirectBoard was loaded successfully from bad data", testDirectBoard.isLoaded())
-
         }
         catch (Exception ex) {
             Assert.fail("testSolveDirectInputBoard: board was not solved successfully")
@@ -63,7 +62,6 @@ class SudokuBoardTest extends groovy.util.GroovyTestCase {
         try {
             // clean up existing output file - does not throw any exceptions if the file is already deleted
             new File("testWriteSolution-output.txt").delete()
-
             SudokuBoard testBoard = SudokuBoard.LoadSudokuBoardFromFile(getPathForTestFile("good-board.txt"))
             // board should not be null
             Assert.assertNotNull("testWriteSolution: testBoard is null", testBoard)
@@ -116,7 +114,7 @@ class SudokuBoardTest extends groovy.util.GroovyTestCase {
     @Test
     void testLoadFileWithWrongSize() {
         try {
-            SudokuBoard testBoard = SudokuBoard.LoadSudokuBoardFromFile("src/test/resources/bad-board-size-80.txt")
+            SudokuBoard testBoard = SudokuBoard.LoadSudokuBoardFromFile(getPathForTestFile("bad-board-size-80.txt"))
             // board should be null
             Assert.assertNull("testLoadFileWithWrongSize: testBoard is not null", testBoard)
             testBoard.solveBoard()
@@ -132,7 +130,7 @@ class SudokuBoardTest extends groovy.util.GroovyTestCase {
         }
 
         try {
-            SudokuBoard testBoard = SudokuBoard.LoadSudokuBoardFromFile("src/test/resources/bad-board-size-82.txt")
+            SudokuBoard testBoard = SudokuBoard.LoadSudokuBoardFromFile(getPathForTestFile("bad-board-size-82.txt"))
             // board should be null
             Assert.assertNull("testLoadFileWithWrongSize: testBoard is not null", testBoard)
             testBoard.solveBoard()
@@ -152,7 +150,7 @@ class SudokuBoardTest extends groovy.util.GroovyTestCase {
     @Test
     void testLoadFileWithInvalidCharacters() {
         try {
-            SudokuBoard testBoard = SudokuBoard.LoadSudokuBoardFromFile("src/test/resources/bad-board-invalid-characters.txt")
+            SudokuBoard testBoard = SudokuBoard.LoadSudokuBoardFromFile(getPathForTestFile("bad-board-invalid-characters.txt"))
             // board should be null
             Assert.assertNull("testLoadFileWithInvalidCharacters: testBoard is not null", testBoard)
             testBoard.solveBoard()
@@ -172,7 +170,7 @@ class SudokuBoardTest extends groovy.util.GroovyTestCase {
     @Test
     void testSolveUnsolvableBoard() {
         try {
-            SudokuBoard testBoard = SudokuBoard.LoadSudokuBoardFromFile("src/test/resources/bad-board-unsolvable.txt")
+            SudokuBoard testBoard = SudokuBoard.LoadSudokuBoardFromFile(getPathForTestFile("bad-board-unsolvable.txt"))
             // board should not be null
             Assert.assertNotNull("testSolveUnsolvableBoard: testBoard is null", testBoard)
             testBoard.solveBoard()

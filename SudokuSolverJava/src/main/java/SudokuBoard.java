@@ -41,7 +41,6 @@ public class SudokuBoard {
     }
 
     public SudokuBoard(int[][] boardData) {
-        this.values = null;
         // make sure it's 9x9 in case it wasn't loaded from a file
         if (boardData.length == 9) {
             for (int row = 0; row < 9; row++) {
