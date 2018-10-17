@@ -1,34 +1,38 @@
+import com.sun.media.sound.InvalidFormatException;
+
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 
 public class SudokuBoard {
     private int[][] values;
+    private boolean loaded;
     private boolean solved;
 
-    public boolean isSolved()
-    {
+    public boolean isLoaded() {
+        return this.loaded;
+    }
+
+    public boolean isSolved() {
         return this.solved;
     }
 
+
     public static SudokuBoard LoadSudokuBoardFromFile(String boardfileName)
-            throws FileNotFoundException, IOException, Exception
-    {
+            throws NoSuchFileException, IOException, InvalidFormatException, Exception {
         int[][] boardData = new int[9][];
         String initialValues = String.join("", Files.readAllLines(Paths.get(boardfileName))).replaceAll("[\r\n]", "");
-        if(initialValues.length() != 81) {
-            throw new Exception(String.format("Invalid board size: %s (should be 81)", initialValues.length()));
+        if (initialValues.length() != 81) {
+            throw new InvalidFormatException(String.format("Invalid board size: %s (should be 81)", initialValues.length()));
         }
 
-        for(int row = 0; row < 9; row++)
-        {
-            boardData[row] = new int [9];
-            for(int column = 0; column < 9; column++)
-            {
+        for (int row = 0; row < 9; row++) {
+            boardData[row] = new int[9];
+            for (int column = 0; column < 9; column++) {
                 char thisVal = initialValues.charAt(9 * row + column);
-                if("123456789X".indexOf(thisVal) < 0)
-                {
-                    throw new Exception(String.format("Invalid character found on board: %c", thisVal));
+                if ("123456789X".indexOf(thisVal) < 0) {
+                    throw new InvalidFormatException(String.format("Invalid character found on board: %c", thisVal));
                 }
                 boardData[row][column] = thisVal == 'X' ? 0 : thisVal - '0';
             }
@@ -36,47 +40,46 @@ public class SudokuBoard {
         return new SudokuBoard(boardData);
     }
 
-    public SudokuBoard(int[][] boardData)
-            throws FileNotFoundException, IOException, Exception
-    {
-        this.values = boardData.clone();
+    public SudokuBoard(int[][] boardData) {
+        this.values = null;
+        // make sure it's 9x9 in case it wasn't loaded from a file
+        if (boardData.length == 9) {
+            for (int row = 0; row < 9; row++) {
+                if (boardData[row].length != 9) return;
+            }
+            this.values = boardData.clone();
+            this.loaded = true;
+        }
     }
 
     // see if a row contains a number
-    private boolean rowContainsNumber(int row, int number)
-    {
-        for(int column = 0; column < 9; column++)
-        {
-            if(this.values[row][column] == number) return true;
+    private boolean rowContainsNumber(int row, int number) {
+        for (int column = 0; column < 9; column++) {
+            if (this.values[row][column] == number) return true;
         }
         return false;
     }
 
     // see if a column contains a number
-    private boolean columnContainsNumber(int column, int number)
-    {
-        for(int row = 0; row < 9; row++)
-        {
-            if(this.values[row][column] == number) return true;
+    private boolean columnContainsNumber(int column, int number) {
+        for (int row = 0; row < 9; row++) {
+            if (this.values[row][column] == number) return true;
         }
         return false;
     }
 
     // see if <number> is used in a 3x3 section starting at [sectionStartingRow][sectionStartingColumn]
-    private boolean sectionContainsNumber(int sectionStartingRow, int sectionStartingColumn, int number)
-    {
-        for(int row = sectionStartingRow; row < sectionStartingRow + 3; row++)
-        {
+    private boolean sectionContainsNumber(int sectionStartingRow, int sectionStartingColumn, int number) {
+        for (int row = sectionStartingRow; row < sectionStartingRow + 3; row++) {
             for (int column = sectionStartingColumn; column < sectionStartingColumn + 3; column++) {
-                if(this.values[row][column] == number) return true;
+                if (this.values[row][column] == number) return true;
             }
         }
         return false;
     }
 
     // see if [row][column] can legally hold <number>
-    private boolean canSpaceHoldNumber(int row, int column, int number)
-    {
+    private boolean canSpaceHoldNumber(int row, int column, int number) {
         // if the row does not contain the number...
         return !rowContainsNumber(row, number)
                 // and the column does not contain the number...
@@ -87,22 +90,19 @@ public class SudokuBoard {
     }
 
     // find the first empty space; returns (row: -1, column: -1) if none are found
-    private int[] getEmptySpace()
-    {
+    private int[] getEmptySpace() {
         for (int row = 0; row < 9; row++)
             for (int column = 0; column < 9; column++)
                 if (this.values[row][column] == 0) return new int[]{row, column};
 
-        return new int[] {-1, -1};
+        return new int[]{-1, -1};
     }
 
-    public void solveBoard()
-    {
-        solved = solveRecursively();
+    public void solveBoard() {
+        this.solved = solveRecursively();
     }
 
-    private boolean solveRecursively()
-    {
+    private boolean solveRecursively() {
         {
             // methodology:
             // 1. find the first empty square on the board
@@ -115,10 +115,8 @@ public class SudokuBoard {
             //    it's an invalid board and there is no solution
             int[] firstEmptySpace = getEmptySpace();
             if (firstEmptySpace[0] == -1 && firstEmptySpace[1] == -1) return true;
-            for (int valToTest = 1; valToTest <= 9; valToTest++)
-            {
-                if (canSpaceHoldNumber(firstEmptySpace[0], firstEmptySpace[1], valToTest))
-                {
+            for (int valToTest = 1; valToTest <= 9; valToTest++) {
+                if (canSpaceHoldNumber(firstEmptySpace[0], firstEmptySpace[1], valToTest)) {
                     values[firstEmptySpace[0]][firstEmptySpace[1]] = valToTest;
                     if (solveRecursively())
                         return true;
@@ -130,23 +128,16 @@ public class SudokuBoard {
     }
 
     public void writeSolution(String outputFileName)
-            throws IOException
-    {
-        try (FileWriter outputFile = new FileWriter(outputFileName, false))
-        {
-            if (this.solved)
-            {
-                for (int row = 0; row < 9; row++)
-                {
-                    for (int column = 0; column < 9; column++)
-                    {
-                        outputFile.write(this.values[row][column] + "") ;
+            throws IOException {
+        try (FileWriter outputFile = new FileWriter(outputFileName, false)) {
+            if (this.solved) {
+                for (int row = 0; row < 9; row++) {
+                    for (int column = 0; column < 9; column++) {
+                        outputFile.write(this.values[row][column] + "");
                     }
                     outputFile.write("\r\n");
                 }
-            }
-            else
-            {
+            } else {
                 outputFile.write("Board is not solvable.\r\n");
             }
         }

@@ -352,3 +352,10 @@ SudokuSolverJava/puzzle4.sln.txt
 SudokuSolverJava/puzzle3.sln.txt
 SudokuSolverJava/puzzle2.sln.txt
 SudokuSolverJava/puzzle1.sln.txt
+SudokuSolverJava/target/test-classes/bad-board-invalid-characters.txt
+SudokuSolverJava/target/test-classes/bad-board-size-80.txt
+SudokuSolverJava/target/test-classes/bad-board-size-82.txt
+SudokuSolverJava/target/test-classes/bad-board-unsolvable.txt
+SudokuSolverJava/target/test-classes/good-board.txt
+SudokuSolverJava/target/test-classes/SudokuBoardTest.class
+SudokuSolverJava/testWriteSolution-output.txt
